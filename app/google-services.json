@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "936661845058",
+    "project_id": "findplayers-775d5",
+    "storage_bucket": "findplayers-775d5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936661845058:android:641462eb464c98da5759db",
+        "android_client_info": {
+          "package_name": "com.example.findplayers"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936661845058-s0ecbkmcipbj3tk8ou1ba18lb1b1l2jr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBBkyf-G-FlDux-MSKuFq29Ck1x2KjWrs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "936661845058-s0ecbkmcipbj3tk8ou1ba18lb1b1l2jr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

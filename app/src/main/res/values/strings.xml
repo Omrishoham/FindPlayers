@@ -1,0 +1,15 @@
+<resources>
+    <string name="title_activity_maps" translatable="false">Map</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
+
+    <!--spinner options-->
+    <string-array name="spinner_options">
+        <item>"Basketball"</item>
+        <item>"Soccer"</item>
+        <item>"Tennis"</item>
+        <item>"Running"</item>
+        <item>"Gym Training"</item>
+        <item>"Cards"</item>
+    </string-array>
+</resources>

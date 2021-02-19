@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+
+    <ImageView
+        android:id="@+id/title_bar"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="@color/background"
+        android:paddingVertical="5dp"
+        android:src="@drawable/ic_baseline_add_circle_24"
+        app:tint="@color/white" />
+
+    <TextView
+        android:id="@+id/title_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title_bar"
+        android:layout_marginStart="40dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="15dp"
+        android:text="Create Event"
+        android:textColor="@color/background"
+        android:textDirection="anyRtl"
+        android:textSize="20dp" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title_tv"
+        android:layout_marginHorizontal="40dp"
+        android:layout_marginTop="5dp"
+        android:orientation="vertical"
+        android:paddingVertical="10dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/date_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Date"
+            android:textAlignment="viewStart"
+            app:icon="@drawable/ic_baseline_date_range_24"
+            android:layout_gravity="start" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/startTime_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Start Time"
+            android:textAlignment="viewStart"
+            app:icon="@drawable/ic_baseline_access_time_24"
+            android:layout_gravity="start" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/endTime_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="End Time"
+            android:textAlignment="viewStart"
+            app:icon="@drawable/ic_baseline_access_time_24"
+            android:layout_gravity="start" />
+
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@color/main"
+            android:entries="@array/spinner_options" />
+
+
+        <EditText
+            android:id="@+id/maxPlayers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/main"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:layout_marginTop="5dp"
+            android:padding="12sp"
+            android:hint="MaxPlayers"
+            android:textSize="16sp"
+            android:paddingLeft="5dp"
+            />
+
+        <EditText
+            android:id="@+id/notices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/main"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:layout_marginTop="5dp"
+            android:paddingBottom="50dp"
+            android:hint="Notices"
+            android:textSize="16sp"
+            android:paddingLeft="12dp"
+            android:paddingTop="5dp"
+            android:maxLines="4"
+            />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginTop="5dp">
+
+        <Button
+            android:id="@+id/buttonOk"
+            android:backgroundTint="@color/green_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Ok" />
+
+        <Button
+            android:id="@+id/buttonCancel"
+            android:backgroundTint="@color/red"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancel" />
+    </LinearLayout>
+
+    </LinearLayout>
+</RelativeLayout>
