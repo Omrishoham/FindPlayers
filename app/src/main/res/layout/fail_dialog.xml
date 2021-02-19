@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/fail_dialog_icon"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/cancel"/>
+
+    <TextView
+        android:id="@+id/failed_title_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fail_dialog_icon"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:paddingHorizontal="10dp"
+        android:gravity="center"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:text="Something Went Wrong.."
+        android:textSize="30sp" />
+
+    <TextView
+        android:id="@+id/fail_body_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/failed_title_tv"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:gravity="center"
+        android:text="Please Try Again"
+        android:textSize="18sp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/fail_dialog_close_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fail_body_tv"
+        android:layout_centerHorizontal="true"
+        android:layout_marginVertical="15dp"
+        android:paddingVertical="10dp"
+        android:text="Close"
+        android:textAllCaps="false"
+        app:backgroundTint="@color/red"
+        app:cornerRadius="40dp" />
+</RelativeLayout>

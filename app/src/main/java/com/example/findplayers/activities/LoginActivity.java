@@ -5,13 +5,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.findplayers.R;
@@ -20,6 +25,7 @@ import com.example.findplayers.fragments.FragmentSignIn;
 import com.example.findplayers.fragments.FragmentSignUp;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
@@ -85,22 +91,52 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Toast.makeText(LoginActivity.this, "Login Succeed",
-                                    Toast.LENGTH_SHORT).show();
-                            //shared prefernces
+                            //shared prefernces, put user + key
+                            sharedPreferences = getPreferences(MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPreferences.edit();//create an editor to edit him
                             editor.putString("keyUser", email);//add email
                             editor.putString("keyPass", password);//edd pass
                             editor.apply();
+                            //transfer to main map activity
                             Intent intent = new Intent(LoginActivity.this, MainMapActivity.class);
                             startActivity(intent);
+                            //stop progress dialog
+                            progressDialog.dismiss();
+                            //show success dilaog
+                            android.app.AlertDialog alertDialog;
+                            android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                            LayoutInflater inflater = LoginActivity.this.getLayoutInflater();
+                            View view = inflater.inflate(R.layout.succeed_dialog, null);
+                            TextView succeedBodyTv = view.findViewById(R.id.succeed_body_tv);
+                            succeedBodyTv.setText("You Logged In Successfully");
+                            alertDialog = builder.setView(view).show();
+                            Button buttonOk = view.findViewById(R.id.succeed_dialog_close_btn);
+                            buttonOk.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    alertDialog.dismiss();
+                                }
+                            });
+
 
                         } else {
                             // If sign in fails, display a message to the user.
-                            Toast.makeText(LoginActivity.this, "Login Failed",
-                                    Toast.LENGTH_SHORT).show();
+                            android.app.AlertDialog alertDialog;
+                            android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                            LayoutInflater inflater = LoginActivity.this.getLayoutInflater();
+                            View view = inflater.inflate(R.layout.fail_dialog, null);
+                            TextView failBodyTv = view.findViewById(R.id.fail_body_tv);
+                            failBodyTv.setText("Login Failed");
+                            alertDialog = builder.setView(view).show();
+                            Button buttonClose = view.findViewById(R.id.fail_dialog_close_btn);
+                            buttonClose.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    alertDialog.dismiss();
+                                }
+                            });
+                            progressDialog.dismiss();
                         }
-                        progressDialog.dismiss();
                     }
                 });
     }
