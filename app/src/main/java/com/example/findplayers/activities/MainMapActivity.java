@@ -4,12 +4,16 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -25,6 +29,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentManager;
 
@@ -43,6 +48,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -96,19 +102,23 @@ public class MainMapActivity extends AppCompatActivity {
     private MaterialButton dateBtn;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // initialize view
         setContentView(R.layout.main_map);
+
         fragmentManager = getSupportFragmentManager();
         //initialize map fragment
         supportMapFragment = (SupportMapFragment) fragmentManager.findFragmentById(R.id.google_map);
+        
         //get ref of google map object for future use
         //intialize fused location
         client = LocationServices.getFusedLocationProviderClient(this);
         getCurrentLocation();
 
+        //progress bar for sign in
         myProgressBar = findViewById(R.id.main_progressbar);
 
         Button buttonCreateEvent = findViewById(R.id.buttonCreateEvent);
@@ -128,7 +138,31 @@ public class MainMapActivity extends AppCompatActivity {
         });
     }
 
+    //showing menu on the action bar
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu,menu);
+        return true;
+    }
 
+    //func tha called when we select on on of the options in the menu
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.logout_item:{
+                //sign out from firebase
+                firebaseAuth.signOut();
+                //transfer to login screen
+                Intent intent = new Intent(MainMapActivity.this, LoginActivity.class);
+                startActivity(intent);
+                return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    //func in order to get current location on map ans set a marker
     private void getCurrentLocation() {
         //check permission before
         //when permission grated
@@ -207,6 +241,7 @@ public class MainMapActivity extends AppCompatActivity {
         }
     }
 
+    //func that get called when user set a result to the permission request
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == 44) {
@@ -217,7 +252,7 @@ public class MainMapActivity extends AppCompatActivity {
         }
     }
 
-
+    //respnsible to set current location marker after user clicked on map
     public void updateCurrentLocation(View view) {
         if (ActivityCompat.checkSelfPermission(MainMapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             //initialize task location
@@ -281,6 +316,7 @@ public class MainMapActivity extends AppCompatActivity {
         return iconId;
     }
 
+    //add game event to list and push to DB
     public void addGameEvent(String ownerId, String type, String date, String startTime, String endTime, String maxPlayers, String notices, String locationLat, String locationLng) {
         GameEvent gameEvent = new GameEvent(ownerId, type, date, startTime, endTime, maxPlayers, notices, locationLat, locationLng);
         DatabaseReference gamesRef = database.getReference("games");
@@ -310,6 +346,7 @@ public class MainMapActivity extends AppCompatActivity {
 
     }
 
+    //func that get up-to-date list and create markers of games accordingly
     public void recreateMarkers() {
         int iconId;
         Marker marker;
@@ -326,6 +363,7 @@ public class MainMapActivity extends AppCompatActivity {
         }
     }
 
+    //this func remove all the game event markers only! not the location markers
     private void removeAllGameMarkers() {
         for (Map.Entry<String, Marker> gameMarker : gameMarkers.entrySet()) {
             gameMarker.getValue().remove();
@@ -359,6 +397,7 @@ public class MainMapActivity extends AppCompatActivity {
         return fullAddress;
     }
 
+    //func showing bottom sheet dialog after user clicked on any game event
     public void showBottomDialogByEvent(String gameId) {
         final BottomSheetDialog dialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
         View bottomSheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_dialog, null);
@@ -472,6 +511,7 @@ public class MainMapActivity extends AppCompatActivity {
 
     }
 
+    //this func return game event object by his gameID
     private GameEvent findGameByGameId(String gameId) {
         for (GameEvent gamegameEvent : gamesList) {
             if (gamegameEvent.getGameId().equals(gameId)) {
@@ -482,7 +522,7 @@ public class MainMapActivity extends AppCompatActivity {
     }
 
 
-    //create event dialog
+    //create event dialog after user clicked create event
     private void createEventDialog() {
         android.app.AlertDialog alertDialog;
         android.app.AlertDialog.Builder builder = new AlertDialog.Builder(this);
