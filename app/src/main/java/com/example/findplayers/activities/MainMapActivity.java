@@ -15,6 +15,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -121,18 +123,38 @@ public class MainMapActivity extends AppCompatActivity {
         //progress bar for sign in
         myProgressBar = findViewById(R.id.main_progressbar);
 
-        Button buttonCreateEvent = findViewById(R.id.buttonCreateEvent);
+
+        //show instruction dialog
+        android.app.AlertDialog alertDialog;
+        android.app.AlertDialog.Builder builder = new AlertDialog.Builder(MainMapActivity.this);
+        LayoutInflater inflater = MainMapActivity.this.getLayoutInflater();
+        View view = inflater.inflate(R.layout.instruction_dialog, null);
+        alertDialog = builder.setView(view).show();
+        Button buttonOk = view.findViewById(R.id.warning_dialog_close_btn);
+        buttonOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+
+
         //set on click on create activity button
+        Button buttonCreateEvent = findViewById(R.id.buttonCreateEvent);
         buttonCreateEvent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 createEventDialog();
             }
         });
+        //set on click on button refresh
         FloatingActionButton buttonRefresh = findViewById(R.id.refresh_fab);
         buttonRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //animation
+                Animation animation = AnimationUtils.loadAnimation(MainMapActivity.this,R.anim.rotate);
+                buttonRefresh.startAnimation(animation);
                 recreateMarkers();
             }
         });
@@ -355,12 +377,23 @@ public class MainMapActivity extends AppCompatActivity {
             removeAllGameMarkers();
             gameMarkers.clear();
         }
+        //take care to clear selection markers on map and clear hash map of selection markers
+        if (selectionMarkers.get("GPS") != null) {
+            markerGPS.remove();
+            selectionMarkers.remove("GPS");
+        }
+        if (selectionMarkers.get("User") != null) {
+            markerUserSelection.remove();
+            selectionMarkers.remove("User");
+        }
+        //create up-to-date game markers
         for (GameEvent gameEvent : gamesList) {
             iconId = iconIdByTypeEvent(gameEvent.getType());
             LatLng latLng = new LatLng(Double.parseDouble(gameEvent.getLocationLat()), Double.parseDouble(gameEvent.getLocationLng()));
             marker = refMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(iconId)).snippet(gameEvent.getGameId()));//snippet is the key of the marker
             gameMarkers.put(gameEvent.getGameId(), marker);
         }
+
     }
 
     //this func remove all the game event markers only! not the location markers

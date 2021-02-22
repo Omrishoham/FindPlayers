@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="13dp"
             android:paddingHorizontal="40dp"
             android:paddingVertical="10dp"
             android:text="Create Event" />
@@ -41,29 +41,35 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="bottom">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/my_location_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_margin="20dp"
+            android:background="@color/white"
+            android:onClick="updateCurrentLocation"
+            android:paddingBottom="20dp"
+            android:src="@drawable/ic_baseline_my_location_24"
+            app:backgroundTint="@color/white" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/refresh_fab"
+            android:layout_above="@+id/my_location_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:background="@color/white"
+            android:onClick="updateMapMarkersAndUpdateLocalGamesList"
+            android:src="@drawable/ic_baseline_refresh_24"
+            app:backgroundTint="@color/white" />
+        </RelativeLayout>
+
     </RelativeLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/my_location_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
-        android:layout_margin="20dp"
-        android:background="@color/white"
-        android:onClick="updateCurrentLocation"
-        android:paddingBottom="20dp"
-        android:src="@drawable/ic_baseline_my_location_24"
-        app:backgroundTint="@color/white" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/refresh_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|left"
-        android:layout_margin="20dp"
-        android:background="@color/white"
-        android:onClick="updateMapMarkersAndUpdateLocalGamesList"
-        android:src="@drawable/ic_baseline_refresh_24"
-        app:backgroundTint="@color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
