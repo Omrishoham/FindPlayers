@@ -4,12 +4,16 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,7 +35,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentManager;
 
@@ -50,7 +53,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -62,6 +64,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -104,7 +107,6 @@ public class MainMapActivity extends AppCompatActivity {
     private MaterialButton dateBtn;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,7 +116,7 @@ public class MainMapActivity extends AppCompatActivity {
         fragmentManager = getSupportFragmentManager();
         //initialize map fragment
         supportMapFragment = (SupportMapFragment) fragmentManager.findFragmentById(R.id.google_map);
-        
+
         //get ref of google map object for future use
         //intialize fused location
         client = LocationServices.getFusedLocationProviderClient(this);
@@ -125,18 +127,7 @@ public class MainMapActivity extends AppCompatActivity {
 
 
         //show instruction dialog
-        android.app.AlertDialog alertDialog;
-        android.app.AlertDialog.Builder builder = new AlertDialog.Builder(MainMapActivity.this);
-        LayoutInflater inflater = MainMapActivity.this.getLayoutInflater();
-        View view = inflater.inflate(R.layout.instruction_dialog, null);
-        alertDialog = builder.setView(view).show();
-        Button buttonOk = view.findViewById(R.id.warning_dialog_close_btn);
-        buttonOk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                alertDialog.dismiss();
-            }
-        });
+        noticeDialog("For creating event, please select the location you would like the event to take place by clicking on map or clicking the Current-Location Button, Have Fun! ");
 
 
         //set on click on create activity button
@@ -144,7 +135,12 @@ public class MainMapActivity extends AppCompatActivity {
         buttonCreateEvent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createEventDialog();
+                if (selectionMarkers.isEmpty()) {
+                    //if user didnt select location for activity ,show notice dialog
+                    noticeDialog("For creating event, please select the location you would like the event to take place by clicking on map or clicking the Current-Location Button, Have Fun! ");
+                } else {//if user select location , show dialog create activity
+                    createEventDialog();
+                }
             }
         });
         //set on click on button refresh
@@ -153,7 +149,7 @@ public class MainMapActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //animation
-                Animation animation = AnimationUtils.loadAnimation(MainMapActivity.this,R.anim.rotate);
+                Animation animation = AnimationUtils.loadAnimation(MainMapActivity.this, R.anim.rotate);
                 buttonRefresh.startAnimation(animation);
                 recreateMarkers();
             }
@@ -164,15 +160,15 @@ public class MainMapActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu,menu);
+        inflater.inflate(R.menu.main_menu, menu);
         return true;
     }
 
     //func tha called when we select on on of the options in the menu
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.logout_item:{
+        switch (item.getItemId()) {
+            case R.id.logout_item: {
                 //sign out from firebase
                 firebaseAuth.signOut();
                 //transfer to login screen
@@ -405,30 +401,25 @@ public class MainMapActivity extends AppCompatActivity {
 
     //func that get lat lng and return full address in one string
     private String addressByLatLng(double lat, double lng) {
-        Geocoder geocoder;
-        List<Address> addresses = null;
-        String fullAddress = "";
-        //Address
-        String address = "";
-        String city = "";
-        String country = "";
-        String knownName = "";
-        geocoder = new Geocoder(this, Locale.getDefault());
-
+        String result = null;
+        Geocoder geocoder = new Geocoder(MainMapActivity.this.getApplicationContext(), Locale.getDefault());
         try {
-            //we get from this func list of addresses by the lat lng and we cares only from the 1st element
-            addresses = geocoder.getFromLocation(lat, lng, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-            address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-            //city = addresses.get(0).getLocality();
-            // country = addresses.get(0).getCountryName();
-
+            List<Address> addressList = geocoder.getFromLocation(lat, lng, 1);
+            if (addressList != null && addressList.size() > 0) {
+                Address address = addressList.get(0);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+                    sb.append(address.getAddressLine(i)); //.append("\n");
+                }
+                sb.append(address.getAddressLine(0));
+                result = sb.toString();
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("Location Address Loader", "Unable connect to Geocoder", e);
         }
-
-        fullAddress = address;
-        return fullAddress;
+        return result;
     }
+
 
     //func showing bottom sheet dialog after user clicked on any game event
     public void showBottomDialogByEvent(String gameId) {
@@ -437,6 +428,7 @@ public class MainMapActivity extends AppCompatActivity {
         GameEvent gameEventClicked = findGameByGameId(gameId);//gamesList[7]
 
         //Views
+        TextView helloTv = bottomSheetView.findViewById(R.id.hello_tv);
         TextView addressTv = bottomSheetView.findViewById(R.id.address_tv);
         TextView typeTv = bottomSheetView.findViewById(R.id.type_tv);
         TextView dateTv = bottomSheetView.findViewById(R.id.date_tv);
@@ -460,6 +452,10 @@ public class MainMapActivity extends AppCompatActivity {
             String address;
             address = addressByLatLng(Double.parseDouble(gameEventClicked.getLocationLat()), Double.parseDouble(gameEventClicked.getLocationLng()));
             addressTv.setText(address);
+            //set hello, if it is host we say hello to host
+            if (uid.equals(gameEventClicked.getOwnerId())) {
+                helloTv.setText("Hi Host,");
+            }
             //set type
             typeTv.setText("Type: " + gameEventClicked.getType());
             //set date
@@ -504,6 +500,7 @@ public class MainMapActivity extends AppCompatActivity {
 
                 DatabaseReference gamesRef = database.getReference("games");
                 gamesRef.setValue(gamesList);
+                successDialog("You joined!");
                 dialog.dismiss();
             }
         });
@@ -511,10 +508,9 @@ public class MainMapActivity extends AppCompatActivity {
         leaveEventBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(gameEventClicked.getOwnerId().equals(uid) && gameEventClicked.getPlayersList().size() == 1){
-                    Toast.makeText(MainMapActivity.this, "You Are The Only Player And The Host -> Please Delete The Event! ", Toast.LENGTH_LONG).show();
-                    dialog.dismiss();
-                }else{
+                if (gameEventClicked.getOwnerId().equals(uid)) {
+                    noticeDialog("Host, you need to delete the event! ");
+                } else {
                     ArrayList<String> playersUids = gameEventClicked.getPlayersList();
                     playersUids.remove(uid);
                     gameEventClicked.setPlayersList(playersUids);
@@ -522,6 +518,7 @@ public class MainMapActivity extends AppCompatActivity {
 
                     DatabaseReference gamesRef = database.getReference("games");
                     gamesRef.setValue(gamesList);
+                    successDialog("You left!");
                     dialog.dismiss();
                 }
 
@@ -534,6 +531,7 @@ public class MainMapActivity extends AppCompatActivity {
                 gamesList.remove(gameEventClicked);
                 DatabaseReference gamesRef = database.getReference("games");
                 gamesRef.setValue(gamesList);
+                successDialog("Event deleted!");
                 dialog.dismiss();
             }
         });
@@ -554,6 +552,58 @@ public class MainMapActivity extends AppCompatActivity {
         return null;
     }
 
+    //get parameters and show fail dialog accordingly
+    private void successDialog(String body) {
+        android.app.AlertDialog alertDialog;
+        android.app.AlertDialog.Builder builder = new AlertDialog.Builder(MainMapActivity.this);
+        LayoutInflater inflater = MainMapActivity.this.getLayoutInflater();
+        View view = inflater.inflate(R.layout.succeed_dialog, null);
+        TextView succeedBodyTv = view.findViewById(R.id.succeed_body_tv);
+        succeedBodyTv.setText(body);
+        alertDialog = builder.setView(view).show();
+        Button buttonOk = view.findViewById(R.id.succeed_dialog_close_btn);
+        buttonOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+    }
+
+    //get parameters and show fail dialog accordingly
+    private void failDialog(String body) {
+        android.app.AlertDialog alertDialog;
+        android.app.AlertDialog.Builder builder = new AlertDialog.Builder(MainMapActivity.this);
+        LayoutInflater inflater = MainMapActivity.this.getLayoutInflater();
+        View view = inflater.inflate(R.layout.fail_dialog, null);
+        TextView failBodyTv = view.findViewById(R.id.fail_body_tv);
+        failBodyTv.setText(body);
+        alertDialog = builder.setView(view).show();
+        Button buttonOk = view.findViewById(R.id.fail_dialog_close_btn);
+        buttonOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+    }
+
+    private void noticeDialog(String body) {
+        android.app.AlertDialog alertDialog;
+        android.app.AlertDialog.Builder builder = new AlertDialog.Builder(MainMapActivity.this);
+        LayoutInflater inflater = MainMapActivity.this.getLayoutInflater();
+        View view = inflater.inflate(R.layout.notice_dialog, null);
+        TextView failBodyTv = view.findViewById(R.id.warning_body_tv);
+        failBodyTv.setText(body);
+        alertDialog = builder.setView(view).show();
+        Button buttonOk = view.findViewById(R.id.warning_dialog_close_btn);
+        buttonOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
+    }
 
     //create event dialog after user clicked create event
     private void createEventDialog() {
@@ -571,14 +621,15 @@ public class MainMapActivity extends AppCompatActivity {
             public void onClick(View view) {
                 maxPlayersString = maxPlayers.getText().toString();
                 noticesString = notices.getText().toString();
-                latString = currentLatLngOnMap.latitude + "";
-                lngString = currentLatLngOnMap.longitude + "";
+                latString = String.valueOf(currentLatLngOnMap.latitude);
+                lngString = String.valueOf(currentLatLngOnMap.longitude);
 
                 if (!maxPlayersString.isEmpty() && !startTimeString.isEmpty() && !endTimeString.isEmpty() && !dateString.isEmpty()) {
                     addGameEvent(uid, typeString, dateString, startTimeString, endTimeString, maxPlayersString, noticesString, latString, lngString);
+                    successDialog("Event Created Successfully!");
                     alertDialog.dismiss();
                 } else {
-                    Toast.makeText(MainMapActivity.this, "Must fill all fields", Toast.LENGTH_SHORT).show();
+                    failDialog("You must fill all fields");
                 }
             }
         });

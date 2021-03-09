@@ -82,7 +82,7 @@ public class LoginActivity extends AppCompatActivity {
         String password = passwordText.getEditText().getText().toString();
 
         //progress dialog
-        ProgressDialog progressDialog = ProgressDialog.show(LoginActivity.this,"Signing in","Please wait..");
+        ProgressDialog progressDialog = ProgressDialog.show(LoginActivity.this,"Logging in","Please wait..");
 
 
         mAuth.signInWithEmailAndPassword(email, password)
@@ -108,9 +108,10 @@ public class LoginActivity extends AppCompatActivity {
                             LayoutInflater inflater = LoginActivity.this.getLayoutInflater();
                             View view = inflater.inflate(R.layout.succeed_dialog, null);
                             TextView succeedBodyTv = view.findViewById(R.id.succeed_body_tv);
-                            succeedBodyTv.setText("You Logged In Successfully");
+                            succeedBodyTv.setText("You Have Successfully Logged In!");
                             alertDialog = builder.setView(view).show();
                             Button buttonOk = view.findViewById(R.id.succeed_dialog_close_btn);
+                            buttonOk.setText("Loading map..");
                             buttonOk.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -166,8 +167,6 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Toast.makeText(LoginActivity.this, "Register Succeed",
-                                    Toast.LENGTH_SHORT).show();
                             FirebaseUser user = mAuth.getCurrentUser();//get the user that register
                             String uid = user.getUid();//get id of the user
 
@@ -176,13 +175,40 @@ public class LoginActivity extends AppCompatActivity {
                             DatabaseReference myRef = database.getReference("players").child(uid);//ref to the user in database that created by his uid under persons, the uid is key that connect us to the user in db
                             Player p = new Player(email,fullname,age,phone,country);
                             myRef.setValue(p);//set values to the user that created in database
+                            //show dialog success
+                            android.app.AlertDialog alertDialog;
+                            android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                            LayoutInflater inflater = LoginActivity.this.getLayoutInflater();
+                            View view = inflater.inflate(R.layout.succeed_dialog, null);
+                            TextView succeedBodyTv = view.findViewById(R.id.succeed_body_tv);
+                            succeedBodyTv.setText("You Have Successfully Registered!");
+                            alertDialog = builder.setView(view).show();
+                            Button buttonOk = view.findViewById(R.id.succeed_dialog_close_btn);
+                            buttonOk.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    alertDialog.dismiss();
+                                }
+                            });
                             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                             fragmentTransaction.replace(R.id.fragmentCon,new FragmentSignIn()).addToBackStack(null).commit();
 
                         } else {
-                            // If sign in fails, display a message to the user.
-                            Toast.makeText(LoginActivity.this, "Register failed",
-                                    Toast.LENGTH_SHORT).show();
+                            // If sign in fails, display a dialog to the user.
+                            android.app.AlertDialog alertDialog;
+                            android.app.AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                            LayoutInflater inflater = LoginActivity.this.getLayoutInflater();
+                            View view = inflater.inflate(R.layout.fail_dialog, null);
+                            TextView failBodyTv = view.findViewById(R.id.fail_body_tv);
+                            failBodyTv.setText("Register Failed! Please Try Again");
+                            alertDialog = builder.setView(view).show();
+                            Button buttonClose = view.findViewById(R.id.fail_dialog_close_btn);
+                            buttonClose.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    alertDialog.dismiss();
+                                }
+                            });
                         }
                     }
                 });
